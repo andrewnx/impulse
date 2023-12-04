@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 
+let dragon, bats;
+
 // Define the preload function
 function preload() {
   this.load.spritesheet("dragon", "assets/dragon.png", {
@@ -19,6 +21,21 @@ function create() {
   this.add.image(400, 300, "background");
 
   const logo = this.add.image(400, 150, "logo");
+
+  // Create animations
+  this.anims.create({
+    key: "dragon-fly",
+    frames: this.anims.generateFrameNumbers("dragon", { start: 0, end: 3 }),
+    frameRate: 10,
+    repeat: -1,
+  });
+
+  this.anims.create({
+    key: "bat-fly",
+    frames: this.anims.generateFrameNumbers("bat", { start: 0, end: 3 }),
+    frameRate: 10,
+    repeat: -1,
+  });
 
   this.tweens.add({
     targets: logo,
@@ -135,26 +152,30 @@ function create() {
 
 // Define the update function
 function update() {
-  // Create and play a flying animation for the dragon sprite
-  this.anims.create({
-    key: "dragon-fly",
-    frames: this.anims.generateFrameNumbers("dragon", { start: 0, end: 3 }),
-    frameRate: 10,
-    repeat: -1,
+  // Play a flying animation for the dragon sprite
+  if (dragon) {
+    dragon.anims.play("dragon-fly", true);
+  }
+
+  // Play a flying animation for each bat sprite
+  bats.children.iterate(function (bat) {
+    if (bat) {
+      bat.anims.play("bat-fly", true);
+    }
   });
-
-  dragon.play("dragon-fly");
-
-  // Create and play a flying animation for the bat sprite
-  this.anims.create({
-    key: "bat-fly",
-    frames: this.anims.generateFrameNumbers("bat", { start: 0, end: 3 }),
-    frameRate: 10,
-    repeat: -1,
-  });
-
-  bat.play("bat-fly");
 }
+
+dragon.play("dragon-fly");
+
+// Create and play a flying animation for the bat sprite
+this.anims.create({
+  key: "bat-fly",
+  frames: this.anims.generateFrameNumbers("bat", { start: 0, end: 3 }),
+  frameRate: 10,
+  repeat: -1,
+});
+
+bat.play("bat-fly");
 
 // Create the config object
 const config = {
@@ -162,7 +183,17 @@ const config = {
   parent: "phaser-example",
   width: 800,
   height: 600,
-  scene: [preload, create, update], // Modify the scene property to include the update function
+  scene: {
+    preload: preload,
+    create: create,
+    update: update,
+  },
+  physics: {
+    default: "matter",
+    matter: {
+      debug: true,
+    },
+  },
 };
 
 // Create the game instance
