@@ -20,8 +20,6 @@ function preload() {
 function create() {
   this.add.image(400, 300, "background");
 
-  const logo = this.add.image(400, 150, "logo");
-
   // Create animations
   this.anims.create({
     key: "dragon-fly",
@@ -47,8 +45,8 @@ function create() {
   });
 
   // Create the dragon, the bats, and the points
-  var dragon = this.matter.add.sprite(400, 300, "dragon");
-  var bats = this.matter.add.group();
+  dragon = this.matter.add.sprite(400, 300, "dragon").setInteractive();
+  bats = this.matter.add.group();
   var points = this.matter.add.group();
 
   // Set the collision categories for the game objects
@@ -109,45 +107,41 @@ function create() {
   });
 
   // Add a collisionStart event listener to handle the collisions
-  this.matter.world.on(
-    "collisionStart",
-    function (event) {
-      // Loop through the pairs of colliding bodies
-      for (var i = 0; i < event.pairs.length; i++) {
-        var bodyA = event.pairs[i].bodyA;
-        var bodyB = event.pairs[i].bodyB;
+  this.matter.world.on("collisionStart", function (event) {
+    // Loop through the pairs of colliding bodies
+    for (var i = 0; i < event.pairs.length; i++) {
+      var bodyA = event.pairs[i].bodyA;
+      var bodyB = event.pairs[i].bodyB;
 
-        // Check if the dragon collides with a point
-        if (
-          (bodyA === dragon.body && bodyB.parent === points) ||
-          (bodyA.parent === points && bodyB === dragon.body)
-        ) {
-          // Increase the score by one
-          score++;
+      // Check if the dragon collides with a point
+      if (
+        (bodyA === dragon.body && bodyB.parent === points) ||
+        (bodyA.parent === points && bodyB === dragon.body)
+      ) {
+        // Increase the score by one
+        score++;
 
-          // Update the score text
-          scoreText.setText("Score: " + score);
+        // Update the score text
+        scoreText.setText("Score: " + score);
 
-          // Destroy the point
-          if (bodyA === dragon.body) {
-            bodyB.gameObject.destroy();
-          } else {
-            bodyA.gameObject.destroy();
-          }
-        }
-
-        // Check if the dragon collides with a bat
-        if (
-          (bodyA === dragon.body && bodyB.parent === bats) ||
-          (bodyA.parent === bats && bodyB === dragon.body)
-        ) {
-          // End the game
-          this.scene.start("GameOverScene", { score: score });
+        // Destroy the point
+        if (bodyA === dragon.body) {
+          bodyB.gameObject.destroy();
+        } else {
+          bodyA.gameObject.destroy();
         }
       }
-    },
-    this
-  );
+
+      // Check if the dragon collides with a bat
+      if (
+        (bodyA === dragon.body && bodyB.parent === bats) ||
+        (bodyA.parent === bats && bodyB === dragon.body)
+      ) {
+        // End the game
+        this.scene.start("GameOverScene", { score: score });
+      }
+    }
+  });
 }
 
 // Define the update function
